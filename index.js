@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const sequelize= require('./config/db.js');
+
 require('./models/index.js');
 
 //importing rotes
@@ -28,7 +28,6 @@ app.get('/',(req,res)=>{
 
 const PORT = process.env.PORT || 5000;
 
-sequelize.authenticate().then(() => console.log("Connect with DB")).catch((error) => console.log(error));
 
 app.listen(PORT,()=> console.log(`Server running on PORT: ${PORT}`))
 
