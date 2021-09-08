@@ -1,6 +1,7 @@
 const {User} = require('../models/index.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const logger =  require('../config/logger');
 
 const registerController = async (req, res) => {
     try {
@@ -50,6 +51,15 @@ const registerController = async (req, res) => {
 const loginController = async (req, res) => {
     try {
         const {username, password} = req.body;
+
+        let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        let useragent = req.headers['user-agent'];
+        //checking if user exists or not
+        logger.log({
+            level: "info",
+            message: "Login Request",
+            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+        });
 
         //checking if user exists or not
         const user = await User.findOne({where: {username: username}});
