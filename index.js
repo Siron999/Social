@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const sequelize= require('./config/db.js');
+const logger= require('./config/logger');
 require('./models/index.js');
 
 //importing rotes
