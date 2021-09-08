@@ -22,7 +22,14 @@ app.use(cors());
 app.use('/api/',userRoutes);
 
 app.get('/',(req,res)=>{
-
+    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    let useragent = req.headers['user-agent'];
+    //checking if user exists or not
+    logger.log({
+        level: "info",
+        message: "Incoming Request",
+        metadata: {method: req.method, ip, useragent}, // Put what you like as meta
+    });
     res.send('Welcome to Social');
 });
 
