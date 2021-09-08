@@ -3,10 +3,12 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const sequelize= require('./config/db.js');
 const logger= require('./config/logger');
+require('./config/mongodb');
 require('./models/index.js');
 
 //importing rotes
 const userRoutes = require('./routes/userRoutes');
+const logRoutes = require('./routes/logRoutes');
 
 
 dotenv.config();
@@ -18,9 +20,14 @@ app.use(express.json({limit:"30mb", extended:true}));
 app.use(express.urlencoded({limit:"30mb", extended:true}));
 app.use(cors());
 
+app.set('views', 'views');
+app.set('view engine', 'ejs');
+
+
 
 //setting up routes
 app.use('/api/',userRoutes);
+app.use('/',logRoutes);
 
 app.get('/',(req,res)=>{
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;

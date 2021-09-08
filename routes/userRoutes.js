@@ -5,7 +5,7 @@ const {registerController, loginController,getUserInfoController ,allUsersContro
 const router = express.Router();
 
 router.post('/register', registerController);
-router.post('/login', loginController);
+router.post('/login',auth, loginController);
 router.get('/current-user',auth, getUserInfoController);
 router.get('/all-users', allUsersController);
 

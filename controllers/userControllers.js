@@ -28,7 +28,7 @@ const registerController = async (req, res) => {
         const savedUser = await User.create({firstName, lastName, username, email, password: hashedPassword});
 
         //creating token
-        const token = jwt.sign({id: savedUser.id}, process.env.TOKEN_SECRET);
+        const token = jwt.sign({id: savedUser.id}, process.env.TOKEN_SECRET,{expiresIn: '7d'});
 
         res.json({
             token, user: {
@@ -42,8 +42,12 @@ const registerController = async (req, res) => {
     } catch (e) {
         if (e.errors.length === 1) {
             res.status(400).json({message: e.errors[0].message});
-        } else {
+        } else if (e.errors.length > 1) {
             res.status(400).json({message: e.errors.map((x) => x.message)});
+        } else if(e.message){
+            res.status(400).json({error:err.message});
+        }else{
+            res.status(400).json({message: "Could not process the request"});
         }
     }
 }
@@ -54,12 +58,6 @@ const loginController = async (req, res) => {
 
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         let useragent = req.headers['user-agent'];
-        //checking if user exists or not
-        logger.log({
-            level: "info",
-            message: "Login Request",
-            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
-        });
 
         //checking if user exists or not
         const user = await User.findOne({where: {username: username}});
@@ -69,11 +67,17 @@ const loginController = async (req, res) => {
         const passwordExist = await bcrypt.compare(password, user.password);
         if (!passwordExist) return res.status(400).send({message: "Password is incorrect"});
 
-        //creating token
-        const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+        // //creating token
+        // const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+
+        logger.log({
+            level: "info",
+            message: "Logged In",
+            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+        });
 
         res.json({
-            token, user: {
+           user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 username: user.username,
@@ -84,8 +88,12 @@ const loginController = async (req, res) => {
     } catch (e) {
         if (e.errors.length === 1) {
             res.status(400).json({message: e.errors[0].message});
-        } else {
+        } else if (e.errors.length > 1) {
             res.status(400).json({message: e.errors.map((x) => x.message)});
+        } else if(e.message){
+            res.status(400).json({error:err.message});
+        }else{
+            res.status(400).json({message: "Could not process the request"});
         }
     }
 }
@@ -103,8 +111,16 @@ const getUserInfoController = async (req, res) => {
                 email: user.email,
             }});
 
-    } catch (err) {
-        res.status(500).json({error:err.message});
+    } catch (e) {
+        if (e.errors.length === 1) {
+            res.status(400).json({message: e.errors[0].message});
+        } else if (e.errors.length > 1) {
+            res.status(400).json({message: e.errors.map((x) => x.message)});
+        } else if(e.message){
+            res.status(400).json({error:err.message});
+        }else{
+            res.status(400).json({message: "Could not process the request"});
+        }
     }
 }
 
@@ -113,7 +129,15 @@ const allUsersController = async (req, res) => {
         const users = await User.findAll();
         res.status(200).json(users);
     } catch (e) {
-        res.status(400).json({message: e.message});
+        if (e.errors.length === 1) {
+            res.status(400).json({message: e.errors[0].message});
+        } else if (e.errors.length > 1) {
+            res.status(400).json({message: e.errors.map((x) => x.message)});
+        } else if(e.message){
+            res.status(400).json({error:err.message});
+        }else{
+            res.status(400).json({message: "Could not process the request"});
+        }
     }
 }
 

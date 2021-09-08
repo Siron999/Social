@@ -1,0 +1,53 @@
+<html>
+<head>
+    <title>Social</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Social</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse d-flex justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">User Logins</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4  d-flex justify-content-center">
+    <div class="table-responsive" style="width: 70%">
+    <table class="table table-striped"  style="font-size: 14px">
+        <thead class="table-dark">
+        <tr>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Details</th>
+            <th scope="col">User Agent</th>
+            <th scope="col">I.P Address</th>
+            <th scope="col">Username</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% users.forEach((x) => { %>
+           <tr>
+               <td scope="col"><%= x.timestamp %></td>
+               <td scope="col"><%= x.message %></td>
+               <td scope="col"><%= x.meta.useragent %></td>
+               <td scope="col"><%= x.meta.ip %></td>
+               <td scope="col"><%= x.meta.username %></td>
+           </tr>
+        <% }); %>
+        </tbody>
+    </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+</body>
+</html>
