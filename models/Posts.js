@@ -7,13 +7,30 @@ const Post = sequelize.define('posts', {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true
     },
-    data: {
+    title: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
             notEmpty: true,
         }
     },
+    caption: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+        }
+    },
+    img: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+        }
+    },
+    likes:{
+        type:Sequelize.INTEGER,
+    }
 });
 
-module.exports=Post;
+module.exports = Post;

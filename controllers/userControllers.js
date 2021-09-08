@@ -1,6 +1,7 @@
 const {User} = require('../models/index.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const logger = require('../utility/logger');
 
 const registerController = async (req, res) => {
     try {
@@ -39,10 +40,12 @@ const registerController = async (req, res) => {
         });
 
     } catch (e) {
-        if (e.errors.length === 1) {
-            res.status(400).json({message: e.errors[0].message});
-        } else {
-            res.status(400).json({message: e.errors.map((x) => x.message)});
+        if (e.errors?.length === 1) {
+            res.status(400).json({message: e.errors[0]?.message});
+        } else if(e.errors?.length > 1) {
+            res.status(400).json({message: e.errors?.map((x) => x.message)});
+        }else{
+            res.status(400).json({message:"Could not process"})
         }
     }
 }
@@ -50,10 +53,23 @@ const registerController = async (req, res) => {
 const loginController = async (req, res) => {
     try {
         const {username, password} = req.body;
-
+        let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        let useragent = req.headers['user-agent'];
         //checking if user exists or not
+        logger.log({
+            level: "info",
+            message: "Login Request",
+            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+        });
         const user = await User.findOne({where: {username: username}});
-        if (!user) return res.status(400).json({message: "User Not found"});
+        if (!user){
+            logger.log({
+                level: "error",
+                message: "User not found",
+                metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+            });
+            return res.status(400).json({message: "User Not found"})
+        };
 
         //passwordCheck
         const passwordExist = await bcrypt.compare(password, user.password);
@@ -62,6 +78,11 @@ const loginController = async (req, res) => {
         //creating token
         const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
 
+        logger.log({
+            level: "info",
+            message: "Logged in",
+            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+        });
         res.json({
             token, user: {
                 firstName: user.firstName,
@@ -72,10 +93,12 @@ const loginController = async (req, res) => {
         });
 
     } catch (e) {
-        if (e.errors.length === 1) {
-            res.status(400).json({message: e.errors[0].message});
-        } else {
-            res.status(400).json({message: e.errors.map((x) => x.message)});
+        if (e.errors?.length === 1) {
+            res.status(400).json({message: e.errors[0]?.message});
+        } else if(e.errors?.length > 1) {
+            res.status(400).json({message: e.errors?.map((x) => x.message)});
+        }else{
+            res.status(400).json({message:"Could not process"})
         }
     }
 }
