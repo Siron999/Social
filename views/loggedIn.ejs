@@ -16,7 +16,9 @@
                     <a class="nav-link active" aria-current="page" href="#">User Logins</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Settings</a>
+                    <form method="POST" action="/logout" name="logout-form" id="logout-form" >
+                    <a class="nav-link" href="#"  onclick="document.forms['logout-form'].submit();">Logout</a>
+                    </form>
                 </li>
             </ul>
         </div>

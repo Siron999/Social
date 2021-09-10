@@ -36,6 +36,14 @@ const User = sequelize.define('users', {
             isEmail: true
         }
     },
+    role: {    //admin || student || teacher
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+            isIn: [['admin', 'student','teacher']],
+        }
+    },
     password: {
         type: Sequelize.STRING,
         allowNull: false,

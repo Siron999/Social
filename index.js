@@ -5,10 +5,13 @@ const sequelize= require('./config/db.js');
 const logger= require('./config/logger');
 require('./config/mongodb');
 require('./models/index.js');
+const cookieParser = require('cookie-parser');
+const sessions = require('express-session');
+
 
 //importing rotes
 const userRoutes = require('./routes/userRoutes');
-const logRoutes = require('./routes/logRoutes');
+const logRoutes = require('./routes/adminRoutes');
 
 
 dotenv.config();
@@ -19,6 +22,13 @@ const app = express();
 app.use(express.json({limit:"30mb", extended:true}));
 app.use(express.urlencoded({limit:"30mb", extended:true}));
 app.use(cors());
+app.use(cookieParser());
+app.use(sessions({
+    secret: "thisismysecrctekeasdyfhrgfgrfrty84fwir767",
+    saveUninitialized:true,
+    cookie: { maxAge: 60000 },
+    resave: false
+}));
 
 app.set('views', 'views');
 app.set('view engine', 'ejs');

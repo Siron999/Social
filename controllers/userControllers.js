@@ -1,11 +1,11 @@
 const {User} = require('../models/index.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const logger =  require('../config/logger');
+const logger = require('../config/logger');
 
 const registerController = async (req, res) => {
     try {
-        const {firstName, lastName, username, email, password, confirmPassword} = req.body;
+        const {firstName, lastName, username, email, role, password, confirmPassword} = req.body;
 
         //checking if user is already registered
         const emailExist = await User.findOne({where: {email: req.body.email}});
@@ -25,10 +25,10 @@ const registerController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
 
-        const savedUser = await User.create({firstName, lastName, username, email, password: hashedPassword});
+        const savedUser = await User.create({firstName, lastName, username, email, role, password: hashedPassword});
 
         //creating token
-        const token = jwt.sign({id: savedUser.id}, process.env.TOKEN_SECRET,{expiresIn: '7d'});
+        const token = jwt.sign({id: savedUser.id, role: savedUser.role}, process.env.TOKEN_SECRET, {expiresIn: '7d'});
 
         res.json({
             token, user: {
@@ -36,6 +36,7 @@ const registerController = async (req, res) => {
                 lastName: savedUser.lastName,
                 username: savedUser.username,
                 email: savedUser.email,
+                role:savedUser.role
             }
         });
 
@@ -44,9 +45,9 @@ const registerController = async (req, res) => {
             res.status(400).json({message: e.errors[0].message});
         } else if (e.errors.length > 1) {
             res.status(400).json({message: e.errors.map((x) => x.message)});
-        } else if(e.message){
-            res.status(400).json({error:err.message});
-        }else{
+        } else if (e.message) {
+            res.status(400).json({error: err.message});
+        } else {
             res.status(400).json({message: "Could not process the request"});
         }
     }
@@ -67,17 +68,47 @@ const loginController = async (req, res) => {
         const passwordExist = await bcrypt.compare(password, user.password);
         if (!passwordExist) return res.status(400).send({message: "Password is incorrect"});
 
-        // //creating token
-        // const token = jwt.sign({id: user.id}, process.env.TOKEN_SECRET);
+        //creating token
+        const token = jwt.sign({id: user.id, role: user.role}, process.env.TOKEN_SECRET, {expiresIn: '7d'});
 
         logger.log({
             level: "info",
             message: "Logged In",
-            metadata: {method: req.method, ip, useragent,username}, // Put what you like as meta
+            metadata: {method: req.method, ip, useragent, username}, // Put what you like as meta
         });
 
         res.json({
-           user: {
+            token,
+            user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                email: user.email,
+                role:user.role
+            }
+        });
+
+    } catch (e) {
+        if (e.errors.length === 1) {
+            res.status(400).json({message: e.errors[0].message});
+        } else if (e.errors.length > 1) {
+            res.status(400).json({message: e.errors.map((x) => x.message)});
+        } else if (e.message) {
+            res.status(400).json({error: err.message});
+        } else {
+            res.status(400).json({message: "Could not process the request"});
+        }
+    }
+}
+
+const getUserInfoController = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user);
+
+        if (!user) return res.send({message: "User not found"});
+
+        res.status(200).json({
+            user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 username: user.username,
@@ -90,35 +121,9 @@ const loginController = async (req, res) => {
             res.status(400).json({message: e.errors[0].message});
         } else if (e.errors.length > 1) {
             res.status(400).json({message: e.errors.map((x) => x.message)});
-        } else if(e.message){
-            res.status(400).json({error:err.message});
-        }else{
-            res.status(400).json({message: "Could not process the request"});
-        }
-    }
-}
-
-const getUserInfoController = async (req, res) => {
-    try {
-        const user= await User.findByPk(req.user);
-
-        if(!user) return res.send({message: "User not found"});
-
-        res.status(200).json({user: {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                username: user.username,
-                email: user.email,
-            }});
-
-    } catch (e) {
-        if (e.errors.length === 1) {
-            res.status(400).json({message: e.errors[0].message});
-        } else if (e.errors.length > 1) {
-            res.status(400).json({message: e.errors.map((x) => x.message)});
-        } else if(e.message){
-            res.status(400).json({error:err.message});
-        }else{
+        } else if (e.message) {
+            res.status(400).json({error: err.message});
+        } else {
             res.status(400).json({message: "Could not process the request"});
         }
     }
@@ -133,9 +138,9 @@ const allUsersController = async (req, res) => {
             res.status(400).json({message: e.errors[0].message});
         } else if (e.errors.length > 1) {
             res.status(400).json({message: e.errors.map((x) => x.message)});
-        } else if(e.message){
-            res.status(400).json({error:err.message});
-        }else{
+        } else if (e.message) {
+            res.status(400).json({error: err.message});
+        } else {
             res.status(400).json({message: "Could not process the request"});
         }
     }
